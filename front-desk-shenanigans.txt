@@ -1,0 +1,603 @@
+/**
+ * Scheduling Shenanigans at The Vogon Poetry Corner
+ *
+ * (c) 2017 Front Desk, https://www.frontdeskhq.org
+ */
+
+
+/**
+ * :: The Setup ::
+ *
+ * Let's consider a sample business at Front Desk - The Vogon Poetry Corner.
+ * This particular business is owned and operated by Poet Master Grunthos* 
+ * and offers a number of classes in Vogon poetry**.
+ *
+ *   *  Per The Hitchhiker's Guide to the Galaxy, Grunthos was not a Vogon,
+ *      but Azgoth of Kria
+ *
+ *   ** A form of poetry widely considered to be 3rd worst in the universe
+ */
+var business = {
+  id: 3,
+  name: "The Vogon Poetry Corner",
+  timezone: "Pacific Time (US & Canada)",
+  currency_code: "USD",
+  default_locale: "en",
+  owner_id: 21
+};
+
+var staff_members = [
+  {
+    id: 21,
+    name: "Master Grunthos"
+  },
+  {
+    id: 22,
+    name: "Prostetnic Jeltz"
+  },
+  {
+    id: 23,
+    name: "Paula Nancy Millstone Jennings"
+  }
+];
+
+// The classes offered
+var services = [
+  {
+    id: 121,
+    business_id: 3,
+    name: "Springtime in Hemorrhagic Verse",
+    maximum_clients: 4
+  },
+  {
+    id: 122,
+    business_id: 3,
+    name: "Lessons in Lugubrious Minstrelsy",
+    maximum_clients: 4
+  },
+  {
+    id: 123,
+    business_id: 3,
+    name: "Interpretive Gurgling",
+    maximum_clients: 6
+  }
+];
+
+
+/**
+ * The following are the most regular clients at The Vogon Poetry Corner and
+ * are enrolled in several upcoming classes over the next couple weeks:
+ */
+var clients = [
+  {
+    id: 313,
+    name: "Prophet Zarquon"
+  },
+  {
+    id: 20091,
+    name: "Svlad Cjelli"
+  },
+  {
+    id: 33152,
+    name: "Trillian"
+  },
+  {
+    id: 33155,
+    name: "Ford Prefect"
+  },
+  {
+    id: 9931003,
+    name: "Arthur Dent"
+  },
+];
+
+/**
+ * Each enrollment is represented as an "event_occurrence" in Front Desk's
+ * system, consisting of a reference to the service, a start and end time, and
+ * an array of clients. Here's the set of event occurrences, in chronological
+ * order, for the week of Sunday, May 28, 2017:
+ */
+var event_occurrences = [
+  {
+    id: 1029,
+    service_id: 122,
+    start: "Mon, 29 May 2017 11:00:00 PDT -07:00",
+    end: "Mon, 29 May 2017 12:30:00 PDT -07:00",
+    client_ids: [313]
+  },
+  {
+    id: 923,
+    service_id: 121,
+    start: "Mon, 29 May 2017 12:00:00 PDT -07:00",
+    end: "Mon, 29 May 2017 13:00:00 PDT -07:00",
+    client_ids: [313, 20091, 33152]
+  },
+  {
+    id: 1030,
+    service_id: 122,
+    start: "Tue, 30 May 2017 11:00:00 PDT -07:00",
+    end: "Tue, 30 May 2017 12:30:00 PDT -07:00",
+    client_ids: [20091, 33152, 9931003]
+  },
+  {
+    id: 1031,
+    service_id: 122,
+    start: "Wed, 31 May 2017 11:00:00 PDT -07:00",
+    end: "Wed, 31 May 2017 12:30:00 PDT -07:00",
+    client_ids: [313, 33152, 33155]
+  },
+  {
+    id: 393,
+    service_id: 123,
+    start: "Wed, 31 May 2017 12:00:00 PDT -07:00",
+    end: "Wed, 31 May 2017 12:45:00 PDT -07:00",
+    client_ids: [20091, 9931003]
+  },
+  {
+    id: 924,
+    service_id: 121,
+    start: "Wed, 31 May 2017 12:30:00 PDT -07:00",
+    end: "Wed, 31 May 2017 13:30:00 PDT -07:00",
+    client_ids: [9931003]
+  },
+  {
+    id: 1034,
+    service_id: 122,
+    start: "Wed, 31 May 2017 12:30:00 PDT -07:00",
+    end: "Wed, 31 May 2017 14:00:00 PDT -07:00",
+    client_ids: [20091, 9931003]
+  },
+  {
+    id: 394,
+    service_id: 123,
+    start: "Thu, 1 Jun 2017 12:00:00 PDT -07:00",
+    end: "Thu, 1 Jun 2017 12:45:00 PDT -07:00",
+    client_ids: [313, 20091]
+  },
+  {
+    id: 1032,
+    service_id: 122,
+    start: "Thu, 1 Jun 2017 12:30:00 PDT -07:00",
+    end: "Thu, 1 Jun 2017 14:00:00 PDT -07:00",
+    client_ids: [20091]
+  },
+  {
+    id: 8091,
+    service_id: 123,
+    start: "Thu, 1 Jun 2017 13:30:00 PDT -07:00",
+    end: "Thu, 1 Jun 2017 14:15:00 PDT -07:00",
+    client_ids: [33152, 33155, 9931003]
+  },
+  {
+    id: 1035,
+    service_id: 122,
+    start: "Thu, 1 Jun 2017 14:00:00 PDT -07:00",
+    end: "Thu, 1 Jun 2017 15:30:00 PDT -07:00",
+    client_ids: [313, 33155, 9931003]
+  },
+  {
+    id: 1036,
+    service_id: 122,
+    start: "Thu, 1 Jun 2017 15:30:00 PDT -07:00",
+    end: "Thu, 1 Jun 2017 17:00:00 PDT -07:00",
+    client_ids: [33152, 33155]
+  },
+  {
+    id: 399,
+    service_id: 123,
+    start: "Fri, 2 Jun 2017 12:00:00 PDT -07:00",
+    end: "Fri, 2 Jun 2017 12:45:00 PDT -07:00",
+    client_ids: [313, 20091]
+  },
+  {
+    id: 1033,
+    service_id: 122,
+    start: "Fri, 2 Jun 2017 11:00:00 PDT -07:00",
+    end: "Fri, 2 Jun 2017 12:30:00 PDT -07:00",
+    client_ids: [33152]
+  },
+  {
+    id: 431,
+    service_id: 123,
+    start: "Fri, 2 Jun 2017 13:00:00 PDT -07:00",
+    end: "Fri, 2 Jun 2017 13:45:00 PDT -07:00",
+    client_ids: [33152, 9931003]
+  },
+  {
+    id: 925,
+    service_id: 121,
+    start: "Fri, 2 Jun 2017 13:15:00 PDT -07:00",
+    end: "Fri, 2 Jun 2017 14:15:00 PDT -07:00",
+    client_ids: [33155, 9931003]
+  },
+  {
+    id: 1037,
+    service_id: 122,
+    start: "Fri, 2 Jun 2017 14:00:00 PDT -07:00",
+    end: "Fri, 2 Jun 2017 15:30:00 PDT -07:00",
+    client_ids: [33155, 9931003]
+  }
+];
+
+
+/**
+ * :: The Problem ::
+ *
+ * A speculated side-effect of repeated exposure to Vogon poetry is a
+ * disassociation from the regular passage of time. As such, none of these
+ * clients are particularly good at managing their calendars and frequently
+ * double or even triple book themselves into overlapping classes.
+ *
+ * Can you assist these afflicted individuals by creating a function to find
+ * all their scheduling conflicts over these upcoming classes?
+ *
+ * E-mail your solution to: recruiting@frontdeskhq.com!
+ */
+
+/**
+ * This is the function we'd like you to provide
+ */
+var findSchedulingConflicts = function(clients, event_occurrences) {
+  var conflicts = [];
+  
+  // Solution goes here!
+  // ...
+
+  return conflicts;
+};
+
+
+/**
+ * :: Constraints ::
+ * 
+ * You're welcome to create helper functions as necessary but we'd prefer you
+ * limit the use of (or refrain from using) external libraries as much as
+ * possible.
+ *
+ * The order of the result set is not important, but please return the results
+ * in the following format:
+ *   [
+ *     {
+ *       client_id: 123,
+ *       client_name: "John Smith",
+ *       conflicting_event_occurrence_ids: [
+ *         [...],
+ *         [...],
+ *         ...
+ *       ]
+ *     },
+ *     {
+ *       client_id: 234,
+ *       client_name: "Jane Doe",
+ *       conflicting_event_occurrence_ids: [
+ *         [...],
+ *         [...],
+ *         ...
+ *       ]
+ *     },
+ *     ...
+ *   ];
+ *
+ *
+ * Furthermore, all elements in "conflicting_event_occurrence_ids" should be:
+ *   1. A unique set. That is, it should not contain both [1, 2] and [2, 1]
+ *   2. The largest set possible. If event occurrences 1, 2, and 3 all overlap,
+ *      the result should contain just [1, 2, 3] and not [1, 2, 3] and [1, 2],
+ *      [2, 3], [1, 3] or some combination thereof.
+ *
+ */
+
+
+
+/**
+ * :: Sample Problem & Solution ::
+ *
+ * Here's a simplified example with just 2 clients and 4 classes. In this
+ * scenario, 1 client (John Smith) has 2 sets of conflicts:
+ */
+var sample_clients = [
+  {
+    id: 1,
+    name: "John Smith"
+  },
+  {
+    id: 2,
+    name: "Jane Doe"
+  }
+];
+var sample_event_occurrences = [
+  {
+    id: 1,
+    service_id: 20,
+    start: "Mon, 29 May 2017 12:00:00 PDT -07:00",
+    end: "Mon, 29 May 2017 13:00:00 PDT -07:00",
+    client_ids: [1, 2]
+  },
+  {
+    id: 2,
+    service_id: 30,
+    start: "Mon, 29 May 2017 12:30:00 PDT -07:00",
+    end: "Mon, 31 May 2017 13:30:00 PDT -07:00",
+    client_ids: [1]
+  },
+  {
+    id: 3,
+    service_id: 20,
+    start: "Fri, 2 Jun 2017 13:15:00 PDT -07:00",
+    end: "Fri, 2 Jun 2017 14:15:00 PDT -07:00",
+    client_ids: [1]
+  },
+  {
+    id: 4,
+    service_id: 30,
+    start: "Fri, 2 Jun 2017 13:15:00 PDT -07:00",
+    end: "Fri, 2 Jun 2017 14:15:00 PDT -07:00",
+    client_ids: [1, 2]
+  }
+];
+
+/**
+ * Expected result
+ *
+ * > findSchedulingConflicts(sample_clients, sample_event_occurrences);
+ * > [
+ *      {
+ *        client_id: 1,
+ *        client_name: "John Smith",
+ *        conflicting_event_occurrence_ids: [
+ *          [1, 2],
+ *          [3, 4]
+ *        ]
+ *      }
+ *    ]
+ */
+
+
+/**
+ * :: BONUS DATA SET ::
+ *
+ * The following contains the original data set PLUS an extra week of event
+ * occurrences to test your solution with!
+ */
+var event_occurrences_2wks = [
+  {
+    id: 1029,
+    service_id: 122,
+    start: "Mon, 29 May 2017 11:00:00 PDT -07:00",
+    end: "Mon, 29 May 2017 12:30:00 PDT -07:00",
+    client_ids: [313]
+  },
+  {
+    id: 923,
+    service_id: 121,
+    start: "Mon, 29 May 2017 12:00:00 PDT -07:00",
+    end: "Mon, 29 May 2017 13:00:00 PDT -07:00",
+    client_ids: [313, 20091, 33152]
+  },
+  {
+    id: 1030,
+    service_id: 122,
+    start: "Tue, 30 May 2017 11:00:00 PDT -07:00",
+    end: "Tue, 30 May 2017 12:30:00 PDT -07:00",
+    client_ids: [20091, 33152, 9931003]
+  },
+  {
+    id: 1031,
+    service_id: 122,
+    start: "Wed, 31 May 2017 11:00:00 PDT -07:00",
+    end: "Wed, 31 May 2017 12:30:00 PDT -07:00",
+    client_ids: [313, 33152, 33155]
+  },
+  {
+    id: 393,
+    service_id: 123,
+    start: "Wed, 31 May 2017 12:00:00 PDT -07:00",
+    end: "Wed, 31 May 2017 12:45:00 PDT -07:00",
+    client_ids: [20091, 9931003]
+  },
+  {
+    id: 924,
+    service_id: 121,
+    start: "Wed, 31 May 2017 12:30:00 PDT -07:00",
+    end: "Wed, 31 May 2017 13:30:00 PDT -07:00",
+    client_ids: [9931003]
+  },
+  {
+    id: 1034,
+    service_id: 122,
+    start: "Wed, 31 May 2017 12:30:00 PDT -07:00",
+    end: "Wed, 31 May 2017 14:00:00 PDT -07:00",
+    client_ids: [20091, 9931003]
+  },
+  {
+    id: 394,
+    service_id: 123,
+    start: "Thu, 1 Jun 2017 12:00:00 PDT -07:00",
+    end: "Thu, 1 Jun 2017 12:45:00 PDT -07:00",
+    client_ids: [313, 20091]
+  },
+  {
+    id: 1032,
+    service_id: 122,
+    start: "Thu, 1 Jun 2017 12:30:00 PDT -07:00",
+    end: "Thu, 1 Jun 2017 14:00:00 PDT -07:00",
+    client_ids: [20091]
+  },
+  {
+    id: 8091,
+    service_id: 123,
+    start: "Thu, 1 Jun 2017 13:30:00 PDT -07:00",
+    end: "Thu, 1 Jun 2017 14:15:00 PDT -07:00",
+    client_ids: [33152, 33155, 9931003]
+  },
+  {
+    id: 1035,
+    service_id: 122,
+    start: "Thu, 1 Jun 2017 14:00:00 PDT -07:00",
+    end: "Thu, 1 Jun 2017 15:30:00 PDT -07:00",
+    client_ids: [313, 33155, 9931003]
+  },
+  {
+    id: 1036,
+    service_id: 122,
+    start: "Thu, 1 Jun 2017 15:30:00 PDT -07:00",
+    end: "Thu, 1 Jun 2017 17:00:00 PDT -07:00",
+    client_ids: [33152, 33155]
+  },
+  {
+    id: 399,
+    service_id: 123,
+    start: "Fri, 2 Jun 2017 12:00:00 PDT -07:00",
+    end: "Fri, 2 Jun 2017 12:45:00 PDT -07:00",
+    client_ids: [313, 20091]
+  },
+  {
+    id: 1033,
+    service_id: 122,
+    start: "Fri, 2 Jun 2017 11:00:00 PDT -07:00",
+    end: "Fri, 2 Jun 2017 12:30:00 PDT -07:00",
+    client_ids: [33152]
+  },
+  {
+    id: 431,
+    service_id: 123,
+    start: "Fri, 2 Jun 2017 13:00:00 PDT -07:00",
+    end: "Fri, 2 Jun 2017 13:45:00 PDT -07:00",
+    client_ids: [33152, 9931003]
+  },
+  {
+    id: 925,
+    service_id: 121,
+    start: "Fri, 2 Jun 2017 13:15:00 PDT -07:00",
+    end: "Fri, 2 Jun 2017 14:15:00 PDT -07:00",
+    client_ids: [33155, 9931003]
+  },
+  {
+    id: 1037,
+    service_id: 122,
+    start: "Fri, 2 Jun 2017 14:00:00 PDT -07:00",
+    end: "Fri, 2 Jun 2017 15:30:00 PDT -07:00",
+    client_ids: [33155, 9931003]
+  },
+
+  // week 2
+  {
+    id: 1038,
+    service_id: 122,
+    start: "Mon, 5 Jun 2017 11:00:00 PDT -07:00",
+    end: "Mon, 5 Jun 2017 12:30:00 PDT -07:00",
+    client_ids: [33155, 9931003]
+  },
+  {
+    id: 926,
+    service_id: 121,
+    start: "Mon, 5 Jun 2017 12:00:00 PDT -07:00",
+    end: "Mon, 5 Jun 2017 13:00:00 PDT -07:00",
+    client_ids: [313, 33152, 33155, 9931003]
+  },
+  {
+    id: 1039,
+    service_id: 122,
+    start: "Tue, 6 Jun 2017 11:00:00 PDT -07:00",
+    end: "Tue, 6 Jun 2017 12:30:00 PDT -07:00",
+    client_ids: [313, 20091, 33152, 33155]
+  },
+  {
+    id: 1040,
+    service_id: 122,
+    start: "Wed, 7 Jun 2017 11:00:00 PDT -07:00",
+    end: "Wed, 7 Jun 2017 12:30:00 PDT -07:00",
+    client_ids: [33152]
+  },
+  {
+    id: 400,
+    service_id: 123,
+    start: "Wed, 7 Jun 2017 12:00:00 PDT -07:00",
+    end: "Wed, 7 Jun 2017 12:45:00 PDT -07:00",
+    client_ids: [20091, 33155, 9931003]
+  },
+  {
+    id: 930,
+    service_id: 121,
+    start: "Wed, 7 Jun 2017 12:30:00 PDT -07:00",
+    end: "Wed, 7 Jun 2017 13:30:00 PDT -07:00",
+    client_ids: [20091, 33152, 9931003]
+  },
+  {
+    id: 1043,
+    service_id: 122,
+    start: "Wed, 7 Jun 2017 12:30:00 PDT -07:00",
+    end: "Wed, 7 Jun 2017 14:00:00 PDT -07:00",
+    client_ids: [313, 9931003]
+  },
+  {
+    id: 401,
+    service_id: 123,
+    start: "Thu, 8 Jun 2017 12:00:00 PDT -07:00",
+    end: "Thu, 8 Jun 2017 12:45:00 PDT -07:00",
+    client_ids: [313, 33152]
+  },
+  {
+    id: 1041,
+    service_id: 122,
+    start: "Thu, 8 Jun 2017 12:30:00 PDT -07:00",
+    end: "Thu, 8 Jun 2017 14:00:00 PDT -07:00",
+    client_ids: [313, 33155]
+  },
+  {
+    id: 8092,
+    service_id: 123,
+    start: "Thu, 8 Jun 2017 13:30:00 PDT -07:00",
+    end: "Thu, 8 Jun 2017 14:15:00 PDT -07:00",
+    client_ids: [20091, 9931003]
+  },
+  {
+    id: 1044,
+    service_id: 122,
+    start: "Thu, 8 Jun 2017 14:00:00 PDT -07:00",
+    end: "Thu, 8 Jun 2017 15:30:00 PDT -07:00",
+    client_ids: [33152, 9931003]
+  },
+  {
+    id: 1045,
+    service_id: 122,
+    start: "Thu, 8 Jun 2017 15:30:00 PDT -07:00",
+    end: "Thu, 8 Jun 2017 17:00:00 PDT -07:00",
+    client_ids: []
+  },
+  {
+    id: 1042,
+    service_id: 122,
+    start: "Fri, 9 Jun 2017 11:00:00 PDT -07:00",
+    end: "Fri, 9 Jun 2017 12:30:00 PDT -07:00",
+    client_ids: [20091, 33155]
+  },
+  {
+    id: 402,
+    service_id: 123,
+    start: "Fri, 9 Jun 2017 12:00:00 PDT -07:00",
+    end: "Fri, 9 Jun 2017 12:45:00 PDT -07:00",
+    client_ids: [33155]
+  },
+  {
+    id: 432,
+    service_id: 123,
+    start: "Fri, 9 Jun 2017 13:00:00 PDT -07:00",
+    end: "Fri, 9 Jun 2017 13:45:00 PDT -07:00",
+    client_ids: [33152, 33155]
+  },
+  {
+    id: 931,
+    service_id: 121,
+    start: "Fri, 9 Jun 2017 13:15:00 PDT -07:00",
+    end: "Fri, 9 Jun 2017 14:15:00 PDT -07:00",
+    client_ids: [20091, 9931003]
+  },
+  {
+    id: 1046,
+    service_id: 122,
+    start: "Fri, 9 Jun 2017 14:00:00 PDT -07:00",
+    end: "Fri, 9 Jun 2017 15:30:00 PDT -07:00",
+    client_ids: [33152, 33155, 9931003]
+  }
+];
